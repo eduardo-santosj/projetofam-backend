@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
+require('dotenv/config');
 
 mongoose
-    .connect('mongodb+srv://numeric:LWpass2010@numeric.dkgfo.mongodb.net/myFirstDatabase?retryWrites=true&w=majority', { useNewUrlParser: true })
+    .connect(process.env.MONGO_URL, { useNewUrlParser: true })
     .catch(e => {
         console.error('Connection error', e.message)
     })
