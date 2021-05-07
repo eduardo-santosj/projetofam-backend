@@ -10,7 +10,7 @@ const loginRouter = require('./routes/login-router')
 const addressRouter = require('./routes/address-router')
 
 const app = express()
-const apiPort = process.env.APP_URL
+const apiPort = process.env.PORT || 3000
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
