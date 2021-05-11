@@ -39,7 +39,7 @@ async function createPreClient(req, res){
         })
         .catch(error => {
             return res.status(400).json({
-                error,
+                success: false,
                 message: 'Cliente não foi criado!',
             })
         })
@@ -62,7 +62,7 @@ async function createClient(client, res){
         })
         .catch(error => {
             return res.status(400).json({
-                error,
+                success: false,
                 message: 'Cliente não foi criado!',
             })
         })
@@ -71,29 +71,71 @@ async function createClient(client, res){
 updateClient = async (req, res) => {
     const body = req.body
 
-    if (!body) {
+    if (!body.identificationNumber) {
         return res.status(400).json({
             success: false,
-            error: 'Você tem que fornecer dados para atualizar.',
+            message: 'Você tem que fornecer dados para atualizar.',
         })
     }
 
-    Client.findOne({ _id: req.params.id }, (err, client) => {
+    FullClient.findOne({ _id: req.params.id }, (err, FullClient) => {
         if (err) {
             return res.status(404).json({
                 err,
                 message: 'Cliente não encontrado!',
             })
         }
-        client.name = body.name
-        client.email = body.email
-        client.classification = body.classification
-        client
+
+        FullClient.identificationNumber = body.identificationNumber
+        FullClient.dateOfBirth = body.validation
+        FullClient.phone = body.phone
+        FullClient.Address = body.Address
+        FullClient.isOng = body.isOng
+        FullClient.alreadyAdopted = body.alreadyAdopted
+        FullClient.howManyAdopted = body.howManyAdopted
+        FullClient.gender = body.gender
+        FullClient
             .save()
             .then(() => {
                 return res.status(200).json({
                     success: true,
-                    id: client._id,
+                    id: FullClient._id,
+                    message: 'Cliente atualizado!',
+                })
+            })
+            .catch(error => {
+                return res.status(404).json({
+                    error,
+                    message: 'Não foi possivel atualizar o cliente!',
+                })
+            })
+    })
+}
+
+updatePreClient = async (req, res) => {
+    const body = req.body
+
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            message: 'Você tem que fornecer dados para atualizar.',
+        })
+    }
+
+    PreClient.findOne({ _id: req.params.id }, (err, preClient) => {
+        if (err) {
+            return res.status(404).json({
+                err,
+                message: 'Cliente não encontrado!',
+            })
+        }
+        preClient.finalizeRegistration = body.finalizeRegistration
+        preClient
+            .save()
+            .then(() => {
+                return res.status(200).json({
+                    success: true,
+                    id: preClient._id,
                     message: 'Cliente atualizado!',
                 })
             })
@@ -133,7 +175,7 @@ getClientById = async (req, res) => {
                 .status(404)
                 .json({ success: false, error: `Cliente não encontrado` })
         }
-        return res.status(200).json({ success: true, data: {email: client.email, name: client.name, identificationNumber: client.identificationNumber, dateOfBirth: client.dateOfBirth, gender: client.gender, phone: client.phone, Address: client.Address, isOng: client.isOng, alreadyAdopted: client.alreadyAdopted, howManyAdopted: client.howManyAdopted } })
+        return res.status(200).json({ success: true, data: {id: client._id, email: client.email, name: client.name, identificationNumber: client.identificationNumber, dateOfBirth: client.dateOfBirth, gender: client.gender, phone: client.phone, Address: client.Address, isOng: client.isOng, alreadyAdopted: client.alreadyAdopted, howManyAdopted: client.howManyAdopted } })
     }).catch(err => console.log(err))
 }
 
@@ -155,6 +197,7 @@ module.exports = {
     createPreClient,
     createClient,
     updateClient,
+    updatePreClient,
     deleteClient,
     getClients,
     getClientById,

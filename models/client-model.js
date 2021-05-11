@@ -18,14 +18,8 @@ const FullClient = new Schema(
             number: {type: Number, required: false, default: ''},
             complement: {type: String, required: false, default: ''},
             neighbourhood: {type: String, required: false, default: ''},
-            city: {
-                id: {type: String, required: false, default: ''},
-                name: {type: String, required: false, default: ''},
-            },
-            state: {
-                id: {type: String, required: false, default: ''},
-                name: {type: String, required: false, default: ''},
-            },
+            city: {type: String, required: false, default: ''},
+            state: {type: String, required: false, default: ''},
             type: {type: String, required: false, default: ''},
         },
         isOng: {type: Boolean, required: false, default: false},

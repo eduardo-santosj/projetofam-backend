@@ -8,7 +8,7 @@ const PreClient = new Schema(
         password: { type: String, required: true },
         finalizeRegistration: { type: Boolean },
         createDate: { type: Date },
-    }, { collection: 'users' }
+    }, { collection: 'preUsers' }
 )
 
 module.exports = mongoose.model('numeric', PreClient)

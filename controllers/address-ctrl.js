@@ -1,13 +1,14 @@
 var buscaCep = require('busca-cep');
 
 async function getAddresCep(req, res){
-    buscaCep(req.params.cep, {sync: false, timeout: 1000})
-        .then(endereco => {
-            return res.status(200).json({ success: true, address: endereco});
-        })
-    .catch(erro => {
-        console.log(`Erro: statusCode ${erro.statusCode} e mensagem ${erro.message}`);
-    });
+    var resposta = buscaCep(req.params.cep, {sync: true, timeout: 1000});
+    if (!resposta.erro) {
+        return res.status(200).json({ success: true, address: resposta});
+
+    } else {
+        console.log(`Erro: statusCode ${resposta.statusCode} e mensagem ${resposta.message}`);
+        return res.status(400).json({ success: false, message: "Endereço não encontrado"});
+    }
 }
 
 module.exports = {
