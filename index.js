@@ -8,6 +8,7 @@ require('dotenv/config');
 
 const db = require('./db')
 const clientRouter = require('./routes/client-router')
+const ongRouter = require('./routes/ong-router')
 const loginRouter = require('./routes/login-router')
 const addressRouter = require('./routes/address-router')
 const genderRouter = require('./routes/gender-router')
@@ -30,6 +31,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api', clientRouter)
+app.use('/api', ongRouter)
 app.use('/api', loginRouter)
 app.use('/api', addressRouter)
 app.use('/api', genderRouter)

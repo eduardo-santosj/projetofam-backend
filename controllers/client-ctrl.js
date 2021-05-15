@@ -1,11 +1,13 @@
 const PreClient = require('../models/preclient-model');
 const FullClient = require('../models/client-model');
+const OngsModel = require('../models/ong-model');
 const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
+const SendEmail = require('./helpers/sendEmail')
 
 async function createPreClient(req, res){
     const body = req.body
-
+    let returnClient, returnOng = ''
     if (!body.name) {
         return res.status(400).json({
             success: false,
@@ -13,36 +15,58 @@ async function createPreClient(req, res){
         })
     }
 
-    let client = new PreClient({
-        name: body.name,
-        email: body.email,
-        password: await bcrypt.hash(body.password, 5),
-        finalizeRegistration: body.finalizeRegistration,
-        createDate: moment(body.createDate, "YYYY-MM-DDT00:00:00.000Z").format()
-    });
-
-    if (!client) {
-        return res.status(400).json({ success: false, message: err })
+    if(body.name){
+        await PreClient.countDocuments({ email: body.email }, (err, count) => {
+            if(count>0) {
+                returnClient = count
+                return returnClient, res.status(400).json({ success: false, message: 'E-mail já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
+            }
+        });
+        await OngsModel.countDocuments({ email: body.email }, (err, ongCount) => {
+            if(ongCount>0) {
+                returnOng = ongCount
+                return returnOng, res.status(400).json({ success: false, message: 'E-mail já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
+            }
+        });
     }
 
-    if (client) {
-        await PreClient.findOne({ email: client.email }, (err, clientReturn) => {
-            if(clientReturn)
+    save();
+    async function save() {
+        if(((returnClient>0) || (returnOng>0))) {
+            return res.status(400).json({ success: false, message: 'E-mail já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
+        } else {
+            let client = new PreClient({
+                name: body.name,
+                email: body.email,
+                password: await bcrypt.hash(body.password, 5),
+                finalizeRegistration: body.finalizeRegistration,
+                createDate: moment(body.createDate, "YYYY-MM-DDT00:00:00.000Z").format()
+            });
+
+            if (!client) {
+                return res.status(400).json({ success: false, message: err })
+            }
+
+
+            if(returnClient && returnClient.name) {
                 return res.status(400).json({ success: false, message: 'Cliente já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
-        }).catch(err => console.log(err))
-    }
+            }
 
-    client
-        .save()
-        .then(() => {
-            return createClient(client, res)
-        })
-        .catch(error => {
-            return res.status(400).json({
-                success: false,
-                message: 'Cliente não foi criado!',
-            })
-        })
+            client
+                .save()
+                .then(() => {
+                    SendEmail.sendEmail(client, 'preClient')
+                    return createClient(client, res)
+                })
+                .catch(error => {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'Cliente não foi criado!',
+                    })
+                })
+
+        }
+    }
 }
 
 async function createClient(client, res){
@@ -97,6 +121,7 @@ updateClient = async (req, res) => {
         FullClient
             .save()
             .then(() => {
+                SendEmail.sendEmail(client, 'fullClient')
                 return res.status(200).json({
                     success: true,
                     id: FullClient._id,
