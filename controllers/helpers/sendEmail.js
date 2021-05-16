@@ -1,12 +1,24 @@
-const nodemailer = require('nodemailer');
-const smtpTransport = require('nodemailer-smtp-transport');
-
-const emails = require('./emails')
-
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
+var handlebars = require('handlebars');
+var fs = require('fs');
 
 sendEmail = async (req, res) => {
-  let mailOptions
-  const transporter = nodemailer.createTransport(smtpTransport({
+
+  var readHTMLFile = function(path, callback) {
+    fs.readFile(path, {encoding: 'utf-8'}, function (err, html) {
+      console.log('path',path, 'html',html, 'err', err)
+        if (err) {
+            throw err;
+            callback(err);
+        }
+        else {
+            callback(null, html);
+        }
+    });
+  };
+  
+  smtpTransport = nodemailer.createTransport(smtpTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
     port: 25,
@@ -19,44 +31,66 @@ sendEmail = async (req, res) => {
   }));
 
   if(res === 'preClient') {
-    mailOptions = {
-      from: 'S.O.S Pet',
-      to: req.email,
-      subject: 'teste de email',
-      text: emails.preClient
-    };
+    readHTMLFile(__dirname + '/templatesEmails/preClient.html', function(err, html) {
+      var template = handlebars.compile(html);
+      var replacements = {
+           username: req.name
+      };
+      var htmlToSend = template(replacements);
+      var mailOptions = {
+        from: 'S.O.S Pet',
+        to: req.email,
+        subject: 'Pré Cadastro',
+        html : htmlToSend,
+      };
+      smtpTransport.sendMail(mailOptions, function (error, response) {
+          if (error) {
+              console.log(error);
+              callback(error);
+          }
+      });
+    });
   } else if(res === 'fullClient') {
-    mailOptions = {
-      from: 'S.O.S Pet',
-      to: req.email,
-      subject: 'teste de email',
-      text: emails.fullClient
-    };
+    readHTMLFile(__dirname + '/templatesEmails/fullClient.html', function(err, html) {
+      var template = handlebars.compile(html);
+      var replacements = {
+           username: req.name
+      };
+      var htmlToSend = template(replacements);
+      var mailOptions = {
+        from: 'S.O.S Pet',
+        to: req.email,
+        subject: 'Cadastro de Cliente finalizado!',
+        html : htmlToSend,
+      };
+      smtpTransport.sendMail(mailOptions, function (error, response) {
+          if (error) {
+              console.log(error);
+              callback(error);
+          }
+      });
+    });
   } else if(res === 'fullOngs') {
-    mailOptions = {
-      from: 'S.O.S Pet',
-      to: req.email,
-      subject: 'teste de email',
-      text: emails.fullOngs
-    };
-  } 
-  // else {
-  //   mailOptions = {
-  //     from: 'S.O.S Pet',
-  //     to: 'eduardosantosj2@gmail.com',
-  //     subject: 'teste de email',
-  //     html: emails.fullClient
-  //   };
-  // }
-  
-  
-  transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-      return console.log(error);
-    } else {
-      return console.log('Email sent: ' + info.response);
-    }
-  }); 
+    readHTMLFile(__dirname + '/templatesEmails/fullOngs.html', function(err, html) {
+      var template = handlebars.compile(html);
+      var replacements = {
+           username: req.name
+      };
+      var htmlToSend = template(replacements);
+      var mailOptions = {
+        from: 'S.O.S Pet',
+        to: req.email,
+        subject: 'Cadastro de Ong finalizado!',
+        html : htmlToSend,
+      };
+      smtpTransport.sendMail(mailOptions, function (error, response) {
+          if (error) {
+              console.log(error);
+              callback(error);
+          }
+      });
+    });
+  }
 }
 
 module.exports = {
