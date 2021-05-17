@@ -7,7 +7,6 @@ sendEmail = async (req, res) => {
 
   var readHTMLFile = function(path, callback) {
     fs.readFile(path, {encoding: 'utf-8'}, function (err, html) {
-      console.log('path',path, 'html',html, 'err', err)
         if (err) {
             throw err;
             callback(err);

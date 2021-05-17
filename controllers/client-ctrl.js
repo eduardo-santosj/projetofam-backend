@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const moment = require('moment-timezone');
 const SendEmail = require('./helpers/sendEmail')
 
-async function createPreClient(req, res){
+async function createPreClient(req, res) {
     const body = req.body
     let returnClient, returnOng = ''
     if (!body.name) {
@@ -15,15 +15,15 @@ async function createPreClient(req, res){
         })
     }
 
-    if(body.name){
+    if (body.name) {
         await PreClient.countDocuments({ email: body.email }, (err, count) => {
-            if(count>0) {
+            if (count > 0) {
                 returnClient = count
                 return returnClient, res.status(400).json({ success: false, message: 'E-mail já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
             }
         });
         await OngsModel.countDocuments({ email: body.email }, (err, ongCount) => {
-            if(ongCount>0) {
+            if (ongCount > 0) {
                 returnOng = ongCount
                 return returnOng, res.status(400).json({ success: false, message: 'E-mail já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
             }
@@ -32,7 +32,7 @@ async function createPreClient(req, res){
 
     save();
     async function save() {
-        if(((returnClient>0) || (returnOng>0))) {
+        if (((returnClient > 0) || (returnOng > 0))) {
             return res.status(400).json({ success: false, message: 'E-mail já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
         } else {
             let client = new PreClient({
@@ -48,7 +48,7 @@ async function createPreClient(req, res){
             }
 
 
-            if(returnClient && returnClient.name) {
+            if (returnClient && returnClient.name) {
                 return res.status(400).json({ success: false, message: 'Cliente já Cadastrado em nosso sistema, caso não lembre a senha faça o lembrete de senha.' })
             }
 
@@ -69,7 +69,7 @@ async function createPreClient(req, res){
     }
 }
 
-async function createClient(client, res){
+async function createClient(client, res) {
     let Fullclient = new FullClient({
         name: client.name,
         email: client.email,
@@ -200,8 +200,57 @@ getClientById = async (req, res) => {
                 .status(404)
                 .json({ success: false, error: `Cliente não encontrado` })
         }
-        return res.status(200).json({ success: true, data: {id: client._id, email: client.email, name: client.name, identificationNumber: client.identificationNumber, dateOfBirth: client.dateOfBirth, gender: client.gender, phone: client.phone, Address: client.Address, isOng: client.isOng, alreadyAdopted: client.alreadyAdopted, howManyAdopted: client.howManyAdopted } })
+        return res.status(200).json({ success: true, data: { id: client._id, email: client.email, name: client.name, identificationNumber: client.identificationNumber, dateOfBirth: client.dateOfBirth, gender: client.gender, phone: client.phone, Address: client.Address, isOng: client.isOng, alreadyAdopted: client.alreadyAdopted, howManyAdopted: client.howManyAdopted } })
     }).catch(err => console.log(err))
+}
+
+getFullById = async (req, res) => {
+    let body = ''
+    body = req.params
+
+    await validateClient();
+    async function validateClient() {
+        if(body){
+        await FullClient.countDocuments({ email: body.email }, async (err, count) => {
+            if(count>0) {
+                await FullClient.findOne({ email: body.email }, (err, client) => {
+                    if (err) {
+                        return res.status(400).json({ success: false, error: err })
+                    }
+        
+                    if (!client) {
+                        return res
+                            .status(404)
+                            .json({ success: false, error: `Cliente não encontrado` })
+                    }
+                    return res.status(200).json({ success: true, data: { id: client._id, email: client.email, name: client.name, identificationNumber: client.identificationNumber, dateOfBirth: client.dateOfBirth, gender: client.gender, phone: client.phone, Address: client.Address, isOng: client.isOng, alreadyAdopted: client.alreadyAdopted, howManyAdopted: client.howManyAdopted, typeAccess: client.typeAccess } })
+                }).catch(err => console.log(err))
+            }
+        });
+        }
+    }
+    await validateOng();
+    async function validateOng() {
+        if(body){
+            await OngsModel.countDocuments({ email: body.email }, async (err, ongCount) => {
+                if(ongCount>0) {
+                    await OngsModel.findOne({ email: body.email }, (err, ong) => {
+                        if (err) {
+                            return res.status(400).json({ success: false, error: err })
+                        }
+            
+                        if (!ong) {
+                            return res
+                                .status(404)
+                                .json({ success: false, error: `ONG não encontrado` })
+                        }
+            
+                        return res.status(200).json({ success: true, data: { id: ong._id, email: ong.email, name: ong.name, identificationNumber: ong.identificationNumber, dateOfBirth: ong.dateOfBirth, phone: ong.phone, Address: ong.Address, howManyAdopted: ong.howManyAdopted, typeAccess: ong.typeAccess } })
+                    }).catch(err => console.log(err))
+                }
+            });
+        }
+    }
 }
 
 getClients = async (req, res) => {
@@ -226,4 +275,5 @@ module.exports = {
     deleteClient,
     getClients,
     getClientById,
+    getFullById,
 }

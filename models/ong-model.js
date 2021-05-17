@@ -21,6 +21,7 @@ const OngsModel = new Schema(
             city: {type: String, required: false, default: ''},
             state: {type: String, required: false, default: ''}
         },
+        howManyAdopted: {type: String, required: false, default: ''},
         typeAccess: {type: String, required: false, default:'ONG'}
     }, { collection: 'ongs' }
 )

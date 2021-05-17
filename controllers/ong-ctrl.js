@@ -42,6 +42,7 @@ async function createOng(req, res) {
                 password: await bcrypt.hash(body.password, 5),
                 phone: body.phone,
                 Address: body.Address,
+                howManyAdopted: body.howManyAdopted
             });
         
             if (!ongs) {
