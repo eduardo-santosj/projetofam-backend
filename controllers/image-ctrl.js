@@ -21,17 +21,34 @@ async function uploadImage(req, res){
             return res.status(201).json({
                 success: true,
                 id: image._id,
+                url: image.url,
                 message: 'Imagem Salva!',
             })
         })
 }
 
-async function getImage(req, res){
+async function getImages(req, res){
 
     const image = await ImagePost.find();
     
     return res.json(image)
 }
+
+async function getImage(req, res){
+    await ImagePost.findOne({ _id: req.params.id }, (err, image) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err })
+        }
+
+        if (!image) {
+            return res
+                .status(404)
+                .json({ success: false, error: `Imagem não encontrada` })
+        }
+        return res.status(200).json({ success: true, image: image })
+    })
+}
+
 
 async function deleteImage(req, res){
 
@@ -44,6 +61,7 @@ async function deleteImage(req, res){
 
 module.exports = {
     uploadImage,
+    getImages,
     getImage,
     deleteImage
 }

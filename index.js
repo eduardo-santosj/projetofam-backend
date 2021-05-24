@@ -14,6 +14,7 @@ const addressRouter = require('./routes/address-router')
 const genderRouter = require('./routes/gender-router')
 const typeHouseRouter = require('./routes/typeHouse-router')
 const imageRouter = require('./routes/image-router')
+const petRouter = require('./routes/pet-router')
 
 const app = express()
 const apiPort = process.env.PORT || 3000
@@ -37,5 +38,6 @@ app.use('/api', addressRouter)
 app.use('/api', genderRouter)
 app.use('/api', typeHouseRouter)
 app.use('/api', imageRouter)
+app.use('/api', petRouter)
 
 app.listen(apiPort, () => console.log(`Server running on port ${apiPort}`))

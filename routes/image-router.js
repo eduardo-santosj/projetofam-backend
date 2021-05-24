@@ -10,7 +10,7 @@ router.post('/image', multer(multerConfig).single('file'), ImgCtrl.uploadImage)
 // router.put('/client/:id', ClientCtrl.updateClient)
 // router.put('/preclient/:id', ClientCtrl.updatePreClient)
 router.delete('/image/:id', ImgCtrl.deleteImage)
-router.get('/images', ImgCtrl.getImage)
-// router.get('/clients', ClientCtrl.getClients)
+router.get('/images', ImgCtrl.getImages)
+router.get('/image/:id', ImgCtrl.getImage)
 
 module.exports = router

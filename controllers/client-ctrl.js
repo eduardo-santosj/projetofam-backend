@@ -204,7 +204,7 @@ getClientById = async (req, res) => {
     }).catch(err => console.log(err))
 }
 
-getFullById = async (req, res) => {
+getFullByEmail = async (req, res) => {
     let body = ''
     body = req.params
 
@@ -253,6 +253,55 @@ getFullById = async (req, res) => {
     }
 }
 
+getFullById = async (req, res) => {
+    let body = ''
+    body = req.params
+
+    await validateClient();
+    async function validateClient() {
+        if(body){
+        await FullClient.countDocuments({ _id: body.id }, async (err, count) => {
+            if(count>0) {
+                await FullClient.findOne({ _id: body.id }, (err, client) => {
+                    if (err) {
+                        return res.status(400).json({ success: false, error: err })
+                    }
+        
+                    if (!client) {
+                        return res
+                            .status(404)
+                            .json({ success: false, error: `Cliente não encontrado` })
+                    }
+                    return res.status(200).json({ success: true, data: { id: client._id, email: client.email, name: client.name, identificationNumber: client.identificationNumber, dateOfBirth: client.dateOfBirth, gender: client.gender, phone: client.phone, Address: client.Address, isOng: client.isOng, alreadyAdopted: client.alreadyAdopted, howManyAdopted: client.howManyAdopted, typeAccess: client.typeAccess } })
+                }).catch(err => console.log(err))
+            }
+        });
+        }
+    }
+    await validateOng();
+    async function validateOng() {
+        if(body){
+            await OngsModel.countDocuments({ _id: body.id }, async (err, ongCount) => {
+                if(ongCount>0) {
+                    await OngsModel.findOne({ _id: body.id }, (err, ong) => {
+                        if (err) {
+                            return res.status(400).json({ success: false, error: err })
+                        }
+            
+                        if (!ong) {
+                            return res
+                                .status(404)
+                                .json({ success: false, error: `ONG não encontrado` })
+                        }
+            
+                        return res.status(200).json({ success: true, data: { id: ong._id, email: ong.email, name: ong.name, identificationNumber: ong.identificationNumber, dateOfBirth: ong.dateOfBirth, phone: ong.phone, Address: ong.Address, howManyAdopted: ong.howManyAdopted, typeAccess: ong.typeAccess } })
+                    }).catch(err => console.log(err))
+                }
+            });
+        }
+    }
+}
+
 getClients = async (req, res) => {
     await Client.find({}, (err, client) => {
         if (err) {
@@ -275,5 +324,6 @@ module.exports = {
     deleteClient,
     getClients,
     getClientById,
-    getFullById,
+    getFullByEmail,
+    getFullById
 }
